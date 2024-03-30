@@ -11,6 +11,40 @@
 
 long st = 0;
 
+struct vec3 {
+	float x;
+	float y;
+	float z;
+};
+
+
+struct vec3 vec_mult(struct vec3 a, float s) {
+	struct vec3 out = {a.x*s, a.y*s, a.z*s};
+	return out;
+}
+float vec_mag(struct vec3 a) {
+	return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+}
+struct vec3 vec_norm(struct vec3 a) {
+	float len = vec_mag(a);
+	struct vec3 out = {
+		a.x/len,
+		a.y/len,
+		a.z/len
+	};
+	return out;
+}
+float vec_dot(struct vec3 a, struct vec3 b) {
+	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+struct vec3 vec_sub(struct vec3 a, struct vec3 b) {
+	struct vec3 out = {a.x-b.x,a.y-b.y,a.z-b.z};
+	return out;
+}
+struct vec3 vec_add(struct vec3 a, struct vec3 b) {
+	struct vec3 out = {a.x+b.x,a.y+b.y,a.z+b.z};
+	return out;
+}
 
 long time_ms() {
 	struct timeval tp;
@@ -35,13 +69,47 @@ void clear() {
 
 // Acts like a fragment shader; given an x and y, return a pixel value
 float fragment(int x, int y) {
-	// Transform to screenspace 
-	float u = 2.0*((float)x/(float)WIDTH)-1.0;
-	float v = 2.0*((float)y/(float)HEIGHT)-1.0;
-
 	float t = time_s();
+	
+	// Transform to screenspace 
+	struct vec3 uv = { 2.0*((float)x/(float)WIDTH)-1.0, 2.0*((float)y/(float)HEIGHT)-1.0, 0.0};
+	struct vec3 or = {0.0, 0.0, -1.0}; // Origin/source of rays from camera
+	struct vec3 v = vec_norm(vec_sub(uv,or)); // Direction of camera ray
+	//struct vec3 v = {0.0,0.0,1.0}; // Direction of camera ray
+	struct vec3 c = {0.0, 0.0, 5.0}; // Position of centre of sphere
+	float r = 4.0; // Radius of sphere
+	
+	struct vec3 vl = {cos(t), sin(t), -0.3*sin(0.3*t)};  //Light source direction
+	vl = vec_norm(vl);
+ 
+	
+	// Find lambda for a projection
+	float A = vec_dot(v,v);
+	float B = 2.0*vec_dot(vec_sub(uv, c), v);
+	float C = vec_dot(vec_sub(uv, c), vec_sub(uv, c)) - r*r;
 
-	float out = 0.5+0.5*sin(u*10.0 + sin(t)*5.0)*sin(v*10.0 + cos(t)*5.0);
+	float val = B*B-4*A*C;
+	float lambda = (-B-sqrt(val))/(2.0*A);
+
+	if (val < 0.0 || lambda < 0.0) {
+		return 0.0;
+	}
+	
+
+
+	/*
+	float val = r*r - (uv.x-c.x)*(uv.x-c.x) - (uv.y-c.y)*(uv.y-c.y);
+	printf("%f\n", val);
+	float lambda = sqrt(val) + c.z;
+	*/
+
+	struct vec3 n = vec_sub(vec_add(or, vec_mult(v,lambda)),c);
+	//struct vec3 n = vec_norm(vec_sub(vec_add(uv, vec_mult(v, lambda)), c));
+
+
+	//float out = 0.5+0.5*sin(uv.x*10.0 + sin(t)*5.0)*sin(uv.y*10.0 + cos(t)*5.0);
+	float out = vec_dot(n, vl);
+	out = 1-exp(-out);
 	return out;
 }
 
