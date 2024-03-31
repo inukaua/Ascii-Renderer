@@ -120,7 +120,7 @@ float fragment(int x, int y) {
 // of brightnesses displayable
 char brightness_encode(float brightness) {
 	// Define array of ascii characters sorted by "brightness"
-	static const char vals[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+	static const char vals[] = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neogxjya]2pmwqkP6h9d45YSVO0GbZUAKXHE8RD#$BMNWQ%&@";
 
 	// Clamp brightness to 0.0 and 1.0
 	if (0.0 > brightness) {
@@ -132,7 +132,8 @@ char brightness_encode(float brightness) {
 	// Compute the length of the array so we can map brightness to it
 	// through float to int conversion.
 	float vals_length = (float) (sizeof(vals)/sizeof(vals[0]));
-	int index = (int) ((1.0-brightness)*vals_length);
+	int index = (int) ((1-brightness)*vals_length);
+	index = (int)(vals_length) - index;
 
 	// If vals[] has length N, we'll be indexing vals[N] when brightness==0
 	// so we handle the special case by printing a space instead
@@ -146,13 +147,24 @@ char brightness_encode(float brightness) {
 
 // Loop through buffer and print out characters depending on brightness
 void render(float buffer[WIDTH][HEIGHT]) {
+	char output_buffer[(WIDTH+1)*HEIGHT+1];
+	int i = 0;
 	for (int y=0; y < HEIGHT; y++) {
 		for (int x=0; x < WIDTH; x++) {
 			char output = brightness_encode(buffer[x][y]);
-			printf("%c", output, x, y);
+			//printf("%c", output, x, y);
+			
+			output_buffer[i] = output;
+			i++;
 		}
-		printf("\n");
+		//printf("\n");
+		output_buffer[i] = '\n';
+		i++;
 	}
+	//output_buffer[i] = '\0';
+
+	clear();
+	printf("%s", output_buffer);
 }
 
 // Update framebuffer with values from fragment shader
@@ -179,7 +191,7 @@ int main() {
 	while(1) {
 		if (time_s() > target_time) {
 			update_framebuffer(buffer);
-			clear();
+			//printf("seg");
 			render(buffer);
 			// Avoid expensive call time_s() which causes flickering
 			printf("\nTime (s): %f\n", target_time); 
