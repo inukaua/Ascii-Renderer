@@ -1,4 +1,4 @@
-Render 3D graphics in the terminal.
+Toy project to render 3D graphics in the terminal.
 
 **Compile and Run:**
 ```
