@@ -5,8 +5,8 @@
 #include <sys/time.h>
 #include <time.h>
 
-#define WIDTH 100
 #define HEIGHT 50
+#define WIDTH (HEIGHT*2)
 #define FPS 60.0
 
 long st = 0;
@@ -67,16 +67,18 @@ void clear() {
 	system("clear");
 }
 
+// Main function of interest
 // Acts like a fragment shader; given an x and y, return a pixel value
-float fragment(int x, int y) {
-	float t = time_s();
+float fragment(int x, int y) {	
+	// If time between fragments is significant, this might become a problem lmao
+	float t = time_s(); 
 	
 	// Transform to screenspace 
 	struct vec3 uv = { 2.0*((float)x/(float)WIDTH)-1.0, 2.0*((float)y/(float)HEIGHT)-1.0, 0.0};
 	struct vec3 or = {0.0, 0.0, -1.0}; // Origin/source of rays from camera
 	struct vec3 v = vec_norm(vec_sub(uv,or)); // Direction of camera ray
 	//struct vec3 v = {0.0,0.0,1.0}; // Direction of camera ray
-	struct vec3 c = {0.0, 0.0, 5.0}; // Position of centre of sphere
+	struct vec3 c = {0.0, 0.0, 7.0}; // Position of centre of sphere
 	float r = 4.0; // Radius of sphere
 	
 	struct vec3 vl = {cos(t), sin(t), -0.3*sin(0.3*t)};  //Light source direction
@@ -95,7 +97,6 @@ float fragment(int x, int y) {
 		return 0.0;
 	}
 	
-
 
 	/*
 	float val = r*r - (uv.x-c.x)*(uv.x-c.x) - (uv.y-c.y)*(uv.y-c.y);
@@ -120,7 +121,9 @@ float fragment(int x, int y) {
 // of brightnesses displayable
 char brightness_encode(float brightness) {
 	// Define array of ascii characters sorted by "brightness"
-	static const char vals[] = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neogxjya]2pmwqkP6h9d45YSVO0GbZUAKXHE8RD#$BMNWQ%&@";
+	// Alternative character set " `.'^,*-=;$@"
+	//static const char vals[] = " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neogxjya]2pmwqkP6h9d45YSVO0GbZUAKXHE8RD#$BMNWQ%&@";
+     	static const char vals[] = "$@B%8&WM#oahkbdpqwmZO0QLCJUYXzcvunxrjft*/\\|()1{}[]?-_+~i!lI;:,\"^` ";	
 
 	// Clamp brightness to 0.0 and 1.0
 	if (0.0 > brightness) {
@@ -128,6 +131,8 @@ char brightness_encode(float brightness) {
 	} else if (brightness > 1.0) {
 		brightness = 1.0;
 	}
+
+	brightness = 1.0 - brightness;
 
 	// Compute the length of the array so we can map brightness to it
 	// through float to int conversion.
