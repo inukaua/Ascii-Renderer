@@ -1,10 +1,18 @@
 Render 3D graphics in the terminal.
 
-To compile and run: make && ./out
+**Compile and Run:**
+```
+$ make
+$ ./out
+```
+
+**Code structure:**
+- The main function of interest is the `float fragment(int x, int y);` function. It functions similarly to a fragment shader in OpenGL.
+- The character set used to represent brightness is stored in a string in `char brightness_encode(float brightness);`.
+- The function, `void render(float output_buffer[WIDTH][HEIGHT]);` calls the fragment function for each cell, passes the resut through brightness_encode to map the brightness to a character, and writes to an output buffer which is displayed after each frame.
 
 Example snapshot from rendering a sphere with a directional light:
-
-
+```
 
 
 
@@ -41,12 +49,12 @@ Example snapshot from rendering a sphere with a directional light:
 
 
 
-
-
-
-
 Time (s): 5.350015
+```
 
 
 
-Time (s): 63.232540
+
+
+
+
